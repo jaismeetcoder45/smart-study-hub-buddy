@@ -1,8 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Bookmark, GraduationCap, Book } from 'lucide-react';
+import { BookOpen, Bookmark, GraduationCap, Book, MessageCircle, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const LearnCard = ({ 
   title, 
@@ -27,6 +30,103 @@ const LearnCard = ({
     </CardContent>
   </Card>
 );
+
+const ChatBot = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { type: 'bot', content: 'Hi there! How can I help you learn today?' }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputValue.trim()) {
+      // Add user message
+      setMessages([...messages, { type: 'user', content: inputValue }]);
+      
+      // Simulate bot response
+      setTimeout(() => {
+        setMessages(prev => [...prev, { 
+          type: 'bot', 
+          content: "I'm here to help with your learning journey! If you have questions about study materials or learning paths, feel free to ask."
+        }]);
+      }, 1000);
+      
+      setInputValue('');
+    }
+  };
+
+  return (
+    <>
+      {/* Chat bubble button */}
+      <Button
+        onClick={() => setIsOpen(true)}
+        className={cn(
+          "fixed left-6 bottom-6 z-50 h-14 w-14 rounded-full shadow-lg flex items-center justify-center",
+          "bg-sc-purple hover:bg-sc-purple/90 text-white",
+          isOpen && "hidden"
+        )}
+        size="icon"
+      >
+        <MessageCircle size={24} />
+      </Button>
+
+      {/* Chat window */}
+      {isOpen && (
+        <div className="fixed left-6 bottom-6 z-50 w-80 md:w-96 rounded-xl shadow-lg bg-white border border-border overflow-hidden animate-fade-in">
+          {/* Chat header */}
+          <div className="bg-gradient-to-r from-sc-purple/90 to-sc-purple/70 text-white p-3 flex justify-between items-center">
+            <div className="flex items-center">
+              <MessageCircle size={20} className="mr-2" />
+              <h3 className="font-medium">Learning Assistant</h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(false)}
+              className="h-8 w-8 rounded-full text-white hover:bg-white/20"
+            >
+              <X size={18} />
+            </Button>
+          </div>
+
+          {/* Chat messages */}
+          <ScrollArea className="h-64 p-4 bg-gradient-to-b from-sc-purple/5 to-sc-teal/5">
+            <div className="flex flex-col gap-3">
+              {messages.map((message, index) => (
+                <div 
+                  key={index} 
+                  className={cn(
+                    "max-w-[80%] p-3 rounded-lg",
+                    message.type === 'bot' 
+                      ? "bg-muted self-start rounded-bl-none" 
+                      : "bg-sc-purple/20 self-end rounded-br-none"
+                  )}
+                >
+                  {message.content}
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          {/* Chat input */}
+          <form onSubmit={handleSubmit} className="p-3 border-t flex gap-2">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 px-3 py-2 rounded-md border focus:outline-none focus:ring-1 focus:ring-sc-purple"
+            />
+            <Button type="submit" className="bg-sc-purple hover:bg-sc-purple/90 text-white">
+              Send
+            </Button>
+          </form>
+        </div>
+      )}
+    </>
+  );
+};
 
 const Learn = () => {
   return (
@@ -69,6 +169,9 @@ const Learn = () => {
           </p>
         </div>
       </div>
+      
+      {/* Chatbot component */}
+      <ChatBot />
     </Layout>
   );
 };
